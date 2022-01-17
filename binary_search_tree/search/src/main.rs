@@ -99,13 +99,21 @@ impl Display for BinarySearchTree {
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::time::Instant;
 
 fn main() {
     let file = File::open("../data_100000.txt").expect("no such file");
     let vec: Vec<i32> = BufReader::new(file).lines()
         .map(|l| l.expect("Could not parse line").parse().unwrap())
         .collect();
+    let mut start = Instant::now();
     let mut bst = BinarySearchTree::new();
     bst.insert_all(vec);
+    let mut end = start.elapsed();
+    println!("二分探査木 生成: {}.{:09} ", end.as_secs(),end.subsec_nanos());
+
+    start = Instant::now();
     bst.search(859440);
+    end = start.elapsed();
+    println!("二分探査木 検索: {}.{:09} ", end.as_secs(),end.subsec_nanos());
 }
