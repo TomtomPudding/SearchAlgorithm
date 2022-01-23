@@ -47,10 +47,10 @@ class BST:
                 lst.append(node.right)
             if node.left is not None:
                 lst.append(node.left)
-        if discoverd == True:
-            print(str(value) + " is found!")
-        elif discoverd == False:
-            print(str(value) + " is not found.")
+        # if discoverd == True:
+        #     print(str(value) + " is found!")
+        # elif discoverd == False:
+        #     print(str(value) + " is not found.")
 
     def search_max_depth(self):
         return self.__search_depth(self.root)
@@ -68,13 +68,15 @@ class BST:
         return max_depth
 
 if __name__ == '__main__':
-    with open('data_100000.txt', mode='r') as f:
+    with open('data_1000000.txt', mode='r') as f:
         number_list = list(map(int, f.readlines()))
     time_sta = time.perf_counter()
     bst = BST(number_list)
     time_bst = time.perf_counter()
     print("二分探査木 生成:", time_bst-time_sta)
     # print(bst.search_max_depth())
-    bst.search(998037)
+    # 測定できないので100件
+    for i in range(0, 10000000, 100000):
+        bst.search(i)
     time_bst_search = time.perf_counter()
     print("二分探査木 検索:", time_bst_search-time_bst)
