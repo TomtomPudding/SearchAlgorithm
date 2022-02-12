@@ -2,6 +2,9 @@
 -- data Tree = Empty | Node Int Tree Tree deriving Show
 import System.IO
 import Data.List.Split
+import Data.Time
+import Test.HUnit
+import Control.Monad
 
 data Tree a = Empty | Node a (Tree a) (Tree a) deriving Show
 
@@ -15,10 +18,13 @@ loadLines filename = do
     contents <- hGetContents handle
     return $ lines contents
 
-main = do
-    line <- loadLines "../data_1000000.txt"
-    lineInt <- return $ map (\x -> read x :: Int) line
-    print $ take 1 lineInt
+search :: Ord k => k -> Tree k -> Maybe k
+search _ Empty = Nothing
+search x (Node k left right)
+    | x == k    = Just k
+    | x < k     = search x left
+    | x > k     = search x right
+    | otherwise = Nothing
 
 insert :: Ord k => k -> Tree k -> Tree k
 insert x Empty = Node x Empty Empty
@@ -27,35 +33,35 @@ insert x (Node k left right)
     | x < k     = Node k (insert x left) right
     | otherwise = Node k left (insert x right)
 
+getAnswer :: Int -> [Int] -> Maybe Int
+getAnswer n answers
+    | (elem n answers) = Just n
+    | otherwise      = Nothing
+
+-- foldl 左結合
+-- foldl (⊕) v [x0, x1, ..., xn] = (...((v ⊕ x0) ⊕ x1)...) ⊕ xn
+-- a は初期値をEmpty にしループ中は前回ループの結果が利用される
 fromList :: Ord k => [k] -> Tree k
 fromList xs = foldl (\a (v) -> insert v a) Empty xs
 
+loopTree 0 tree = Nothing
+loopTree n tree = do {
+    search n tree;
+    loopTree (n - 1) tree
+}
 
--- treeElem :: (Ord a) => a -> Tree a -> Bool
--- treeElem _ Empty = False
--- treeElem x (Node a left right)
---     | x == a    = True
---     | x < a     = treeElem x left
---     | otherwise = treeElem x right
+treeTest :: Tree Int -> [Int] -> Test
+treeTest tree answers = test $ map (\x -> (search x tree) ~=? (getAnswer x answers)) [1..100000]
 
-
--- div2 :: Int->Int
--- div2 n = truncate ((fromIntegral n :: Float) / 2.0)
-
--- -- | [a]を前半と真ん中と後半の３つの部分に分ける
--- divArrayIn3 :: [a] -> ([a],a,[a])
--- divArrayIn3 [] = error "error"
--- divArrayIn3 [x] = ([],x,[])
--- divArrayIn3 xs = (first,middle,second)
---     where
---         halfLength = div2 $ length xs
---         first = take halfLength xs
---         middle:second = drop halfLength xs
-
--- createMinumulBST :: [a] -> Tree a
--- createMinumulBST [] = Empty
--- createMinumulBST xs = Node middle left right
---     where
---         (first,middle,second) = divArrayIn3 xs
---         left = createMinumulBST $ first
---         right = createMinumulBST $ second
+main = do
+    line <- loadLines "../data_1000000.txt"
+    lineInt <- return $ map (\x -> read x :: Int) line
+    start <- getCurrentTime
+    resultTree <- return $ fromList lineInt
+    print $ (search 6698254 resultTree)
+    end <- getCurrentTime
+    print $ diffUTCTime end start
+    -- _ <- runTestTT (treeTest resultTree lineInt)
+    print $ length $ map (\x -> (search x resultTree)) [1..10000000]
+    end2 <- getCurrentTime
+    print $ diffUTCTime end2 end
