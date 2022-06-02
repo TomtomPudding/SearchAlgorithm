@@ -3,6 +3,7 @@
 import System.IO
 import Data.List.Split
 import Data.Time
+import Data.Maybe
 import Test.HUnit
 import Control.Monad
 
@@ -38,6 +39,8 @@ getAnswer n answers
     | (elem n answers) = Just n
     | otherwise      = Nothing
 
+
+
 -- foldl 左結合
 -- foldl (⊕) v [x0, x1, ..., xn] = (...((v ⊕ x0) ⊕ x1)...) ⊕ xn
 -- a は初期値をEmpty にしループ中は前回ループの結果が利用される
@@ -61,7 +64,8 @@ main = do
     print $ (search 6698254 resultTree)
     end <- getCurrentTime
     print $ diffUTCTime end start
-    -- _ <- runTestTT (treeTest resultTree lineInt)
-    print $ length $ map (\x -> (search x resultTree)) [1..10000000]
+    -- runTestText (putTextToHandle stderr False) (treeTest resultTree lineInt)
+    res <- return $ mapMaybe (\x -> (search x resultTree)) [1..10000000]
+    print $ length res
     end2 <- getCurrentTime
     print $ diffUTCTime end2 end
